@@ -6,9 +6,12 @@ typedef int bool;
 #define false (!true)
 
 long lastInterruptTime = 0;
+int delayTime = 10000;
 bool pressedButtonOnGreen1 = false;
 bool pressedButtonOnGreen2 = false;
-int delayTime = 10000;
+bool pressedButtonOnRed = false;
+bool carSensorButton1 = false;
+bool carSensorButton2 = false;
 
 #define ESTADO_VERMELHO_SEMAFORO 0
 #define PRIMEIRO_ESTADO_SEMAFORO 1
@@ -48,7 +51,7 @@ typedef struct trafficLights
 trafficLights principal;
 trafficLights auxiliary;
 
-void changeTimerButton()
+void passengerPass()
 {
     long interruptTime = millis();
 
@@ -66,6 +69,18 @@ void changeTimerButton()
     lastInterruptTime = interruptTime;
 }
 
+void carPass()
+{
+    long interruptTime = millis();
+
+    if (interruptTime - lastInterruptTime > 300)
+    {
+        carSensorButton1 = digitalRead(SENSOR_PASSAGEM_1);
+        carSensorButton2 = digitalRead(SENSOR_PASSAGEM_2);
+    }
+    lastInterruptTime = interruptTime;
+}
+
 void setTimerLeds(int num)
 {
     switch (num)
@@ -79,6 +94,7 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.red.pin, 1);
         auxiliary.green.state = false;
         principal.green.state = true;
+        pressedButtonOnRed = true;
         break;
     case SEGUNDO_ESTADO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
@@ -90,6 +106,7 @@ void setTimerLeds(int num)
         auxiliary.green.state = false;
         principal.green.state = false;
         pressedButtonOnGreen2 = false;
+        pressedButtonOnRed = false;
         break;
     case TERCEIRO_ESTADO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
@@ -100,6 +117,7 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.red.pin, 0);
         auxiliary.green.state = true;
         principal.green.state = false;
+        pressedButtonOnRed = false;
         break;
     case QUARTO_ESTADO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
@@ -111,6 +129,7 @@ void setTimerLeds(int num)
         auxiliary.green.state = false;
         principal.green.state = false;
         pressedButtonOnGreen1 = false;
+        pressedButtonOnRed = false;
         break;
     case ESTADO_VERMELHO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
@@ -119,11 +138,12 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.green.pin, 0);
         digitalWrite(auxiliary.yellow.pin, 0);
         digitalWrite(auxiliary.red.pin, 1);
+        pressedButtonOnRed = false;
         break;
     }
 }
 
-void checkGreen(int num)
+void checkTimeTraffic(int num)
 {
     for (int i = 0; i < num; i++)
     {
@@ -132,6 +152,14 @@ void checkGreen(int num)
             return;
         }
         else if (pressedButtonOnGreen2 == true)
+        {
+            return;
+        }
+        else if (carSensorButton1) // checa o vermelho
+        {
+            return;
+        }
+        else if (carSensorButton2) // checa o vermelho
         {
             return;
         }
@@ -145,12 +173,14 @@ void setTimer()
     delay(1000);
     setTimerLeds(PRIMEIRO_ESTADO_SEMAFORO); // primeiro estado semaforo
     delay(10000);
-    checkGreen(9);
+    checkTimeTraffic(5);
     setTimerLeds(SEGUNDO_ESTADO_SEMAFORO);
     delay(3000);
+    setTimerLeds(ESTADO_VERMELHO_SEMAFORO);
+    delay(1000);
     setTimerLeds(TERCEIRO_ESTADO_SEMAFORO);
     delay(5000);
-    checkGreen(5);
+    checkTimeTraffic(4);
     setTimerLeds(QUARTO_ESTADO_SEMAFORO);
     delay(3000);
 }
@@ -184,11 +214,19 @@ int main(void)
 
     pinMode(BOTAO_PEDESTRE_1, INPUT);
     pullUpDnControl(BOTAO_PEDESTRE_1, PUD_UP);
-    wiringPiISR(BOTAO_PEDESTRE_1, INT_EDGE_RISING, &changeTimerButton);
+    wiringPiISR(BOTAO_PEDESTRE_1, INT_EDGE_RISING, &passengerPass);
 
     pinMode(BOTAO_PEDESTRE_2, INPUT);
     pullUpDnControl(BOTAO_PEDESTRE_2, PUD_UP);
-    wiringPiISR(BOTAO_PEDESTRE_2, INT_EDGE_RISING, &changeTimerButton);
+    wiringPiISR(BOTAO_PEDESTRE_2, INT_EDGE_RISING, &passengerPass);
+
+    pinMode(SENSOR_PASSAGEM_1, INPUT);
+    pullUpDnControl(SENSOR_PASSAGEM_1, PUD_UP);
+    wiringPiISR(SENSOR_PASSAGEM_1, INT_EDGE_BOTH, &carPass);
+
+    pinMode(SENSOR_PASSAGEM_2, INPUT);
+    pullUpDnControl(SENSOR_PASSAGEM_2, PUD_UP);
+    wiringPiISR(SENSOR_PASSAGEM_2, INT_EDGE_BOTH, &carPass);
 
     while (1)
     {
