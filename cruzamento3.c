@@ -111,6 +111,14 @@ void setTimerLeds(int num)
         principal.green.state = false;
         pressedButtonOnGreen1 = false;
         break;
+    case 0:
+        digitalWrite(principal.green.pin, 0);
+        digitalWrite(principal.yellow.pin, 0);
+        digitalWrite(principal.red.pin, 1);
+        digitalWrite(auxiliary.green.pin, 0);
+        digitalWrite(auxiliary.yellow.pin, 0);
+        digitalWrite(auxiliary.red.pin, 1);
+        break;
     }
 }
 
@@ -132,8 +140,10 @@ void checkGreen(int num)
 
 void setTimer()
 {
+    setTimerLeds(0);
+    delay(1000);
     setTimerLeds(PRIMEIRO_ESTADO_SEMAFORO); // primeiro estado semaforo
-    delay(10000);
+    delay(9000);
     checkGreen(10);
     setTimerLeds(SEGUNDO_ESTADO_SEMAFORO);
     delay(3000);
