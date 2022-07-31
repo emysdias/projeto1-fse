@@ -6,7 +6,7 @@ typedef int bool;
 #define false (!true)
 
 long lastInterruptTime = 0;
-int test = 500;
+int delayTime = 500;
 
 #define PRIMEIRO_ESTADO_SEMAFORO 1
 #define SEGUNDO_ESTADO_SEMAFORO 2
@@ -45,19 +45,38 @@ typedef struct trafficLights
 trafficLights principal;
 trafficLights auxiliary;
 
-// void callback_function(void)
-// {
-//     long interruptTime = millis();
+void changeTimerButton1()
+{
+    long interruptTime = millis();
 
-//     if (interruptTime - lastInterruptTime > 200)
-//     {
-//         // Perform your logic here
-//         test = 100;
-//         delay(3000);
-//     }
-//     lastInterruptTime = interruptTime;
-//     test = 1000;
-// }
+    if (interruptTime - lastInterruptTime > 300)
+    {
+        if (auxiliary.green.state)
+        {
+            /* code */
+            printf("aaaaa %d\n", auxiliary.green.state);
+        }
+
+        // Perform your logic here
+        delayTime = 100;
+    }
+    lastInterruptTime = interruptTime;
+    delayTime = 1000;
+}
+
+void changeTimerButton2()
+{
+    long interruptTime = millis();
+
+    if (interruptTime - lastInterruptTime > 300)
+    {
+        // Perform your logic here
+        delayTime = 100;
+        delay(3000);
+    }
+    lastInterruptTime = interruptTime;
+    delayTime = 1000;
+}
 
 void setTimerLeds(int num)
 {
@@ -70,6 +89,7 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.green.pin, 0);
         digitalWrite(auxiliary.yellow.pin, 0);
         digitalWrite(auxiliary.red.pin, 1);
+        auxiliary.green.state = false;
         break;
     case SEGUNDO_ESTADO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
@@ -78,6 +98,7 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.green.pin, 0);
         digitalWrite(auxiliary.yellow.pin, 0);
         digitalWrite(auxiliary.red.pin, 1);
+        auxiliary.green.state = false;
         break;
     case TERCEIRO_ESTADO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
@@ -86,6 +107,7 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.green.pin, 1);
         digitalWrite(auxiliary.yellow.pin, 0);
         digitalWrite(auxiliary.red.pin, 0);
+        auxiliary.green.state = true;
         break;
     case QUARTO_ESTADO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
@@ -94,6 +116,7 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.green.pin, 0);
         digitalWrite(auxiliary.yellow.pin, 1);
         digitalWrite(auxiliary.red.pin, 0);
+        auxiliary.green.state = false;
         break;
     }
 }
@@ -122,13 +145,13 @@ led setLed(int num, int pin)
 
 void setTrafficLights()
 {
-    principal.green = setLed(1, SEMAFORO_1_VERDE);    // 1 = verde
-    principal.yellow = setLed(2, SEMAFORO_1_AMARELO); // 2 = amareuxiliarylo
-    principal.red = setLed(3, SEMAFORO_1_VERMELHO);   // 3 = vermelho
+    principal.green = setLed(1, SEMAFORO_2_VERDE);    // 1 = verde
+    principal.yellow = setLed(2, SEMAFORO_2_AMARELO); // 2 = amareuxiliarylo
+    principal.red = setLed(3, SEMAFORO_2_VERMELHO);   // 3 = vermelho
 
-    auxiliary.green = setLed(1, SEMAFORO_2_VERDE);    // 1 = verde
-    auxiliary.yellow = setLed(2, SEMAFORO_2_AMARELO); // 2 = amarelo
-    auxiliary.red = setLed(3, SEMAFORO_2_VERMELHO);   // 3 = vermelho
+    auxiliary.green = setLed(1, SEMAFORO_1_VERDE);    // 1 = verde
+    auxiliary.yellow = setLed(2, SEMAFORO_1_AMARELO); // 2 = amarelo
+    auxiliary.red = setLed(3, SEMAFORO_1_VERMELHO);   // 3 = vermelho
 }
 
 int main(void)
@@ -138,6 +161,14 @@ int main(void)
     wiringPiSetup();
 
     setTrafficLights();
+
+    pinMode(BOTAO_PEDESTRE_1, INPUT);
+    pullUpDnControl(BOTAO_PEDESTRE_1, PUD_UP);
+    wiringPiISR(BOTAO_PEDESTRE_1, INT_EDGE_RISING, &changeTimerButton1);
+
+    pinMode(BOTAO_PEDESTRE_2, INPUT);
+    pullUpDnControl(BOTAO_PEDESTRE_2, PUD_UP);
+    wiringPiISR(BOTAO_PEDESTRE_2, INT_EDGE_RISING, &changeTimerButton2);
 
     while (1)
     {
