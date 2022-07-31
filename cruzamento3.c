@@ -10,6 +10,7 @@ bool pressedButtonOnGreen1 = false;
 bool pressedButtonOnGreen2 = false;
 int delayTime = 10000;
 
+#define ESTADO_VERMELHO_SEMAFORO 0
 #define PRIMEIRO_ESTADO_SEMAFORO 1
 #define SEGUNDO_ESTADO_SEMAFORO 2
 #define TERCEIRO_ESTADO_SEMAFORO 3
@@ -111,7 +112,7 @@ void setTimerLeds(int num)
         principal.green.state = false;
         pressedButtonOnGreen1 = false;
         break;
-    case 0:
+    case ESTADO_VERMELHO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
         digitalWrite(principal.yellow.pin, 0);
         digitalWrite(principal.red.pin, 1);
@@ -140,11 +141,11 @@ void checkGreen(int num)
 
 void setTimer()
 {
-    setTimerLeds(0);
+    setTimerLeds(ESTADO_VERMELHO_SEMAFORO);
     delay(1000);
     setTimerLeds(PRIMEIRO_ESTADO_SEMAFORO); // primeiro estado semaforo
-    delay(9000);
-    checkGreen(10);
+    delay(10000);
+    checkGreen(9);
     setTimerLeds(SEGUNDO_ESTADO_SEMAFORO);
     delay(3000);
     setTimerLeds(TERCEIRO_ESTADO_SEMAFORO);
