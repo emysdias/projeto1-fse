@@ -47,7 +47,7 @@ typedef struct trafficLights
 trafficLights principal;
 trafficLights auxiliary;
 
-void changeTimerButton1()
+void changeTimerButton()
 {
     long interruptTime = millis();
 
@@ -57,17 +57,7 @@ void changeTimerButton1()
         {
             pressedButtonOnGreen1 = true;
         }
-    }
-    lastInterruptTime = interruptTime;
-}
-
-void changeTimerButton2()
-{
-    long interruptTime = millis();
-
-    if (interruptTime - lastInterruptTime > 300)
-    {
-        if (principal.green.state)
+        else if (principal.green.state)
         {
             pressedButtonOnGreen2 = true;
         }
@@ -177,19 +167,17 @@ void setTrafficLights()
 
 int main(void)
 {
-
-    printf("asasas\n");
     wiringPiSetup();
 
     setTrafficLights();
 
     pinMode(BOTAO_PEDESTRE_1, INPUT);
     pullUpDnControl(BOTAO_PEDESTRE_1, PUD_UP);
-    wiringPiISR(BOTAO_PEDESTRE_1, INT_EDGE_RISING, &changeTimerButton1);
+    wiringPiISR(BOTAO_PEDESTRE_1, INT_EDGE_RISING, &changeTimerButton);
 
     pinMode(BOTAO_PEDESTRE_2, INPUT);
     pullUpDnControl(BOTAO_PEDESTRE_2, PUD_UP);
-    wiringPiISR(BOTAO_PEDESTRE_2, INT_EDGE_RISING, &changeTimerButton2);
+    wiringPiISR(BOTAO_PEDESTRE_2, INT_EDGE_RISING, &changeTimerButton);
 
     while (1)
     {
