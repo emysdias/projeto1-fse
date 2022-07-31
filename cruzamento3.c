@@ -6,7 +6,9 @@ typedef int bool;
 #define false (!true)
 
 long lastInterruptTime = 0;
-int delayTime = 500;
+bool pressedButtonOnGreen1 = false;
+bool pressedButtonOnGreen2 = false;
+int delayTime = 10000;
 
 #define PRIMEIRO_ESTADO_SEMAFORO 1
 #define SEGUNDO_ESTADO_SEMAFORO 2
@@ -53,15 +55,10 @@ void changeTimerButton1()
     {
         if (auxiliary.green.state)
         {
-            /* code */
-            printf("aaaaa %d\n", auxiliary.green.state);
+            pressedButtonOnGreen1 = true;
         }
-
-        // Perform your logic here
-        delayTime = 100;
     }
     lastInterruptTime = interruptTime;
-    delayTime = 1000;
 }
 
 void changeTimerButton2()
@@ -70,12 +67,12 @@ void changeTimerButton2()
 
     if (interruptTime - lastInterruptTime > 300)
     {
-        // Perform your logic here
-        delayTime = 100;
-        delay(3000);
+        if (principal.green.state)
+        {
+            pressedButtonOnGreen2 = true;
+        }
     }
     lastInterruptTime = interruptTime;
-    delayTime = 1000;
 }
 
 void setTimerLeds(int num)
@@ -90,6 +87,7 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.yellow.pin, 0);
         digitalWrite(auxiliary.red.pin, 1);
         auxiliary.green.state = false;
+        principal.green.state = true;
         break;
     case SEGUNDO_ESTADO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
@@ -99,6 +97,8 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.yellow.pin, 0);
         digitalWrite(auxiliary.red.pin, 1);
         auxiliary.green.state = false;
+        principal.green.state = false;
+        pressedButtonOnGreen2 = false;
         break;
     case TERCEIRO_ESTADO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
@@ -108,6 +108,7 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.yellow.pin, 0);
         digitalWrite(auxiliary.red.pin, 0);
         auxiliary.green.state = true;
+        principal.green.state = false;
         break;
     case QUARTO_ESTADO_SEMAFORO:
         digitalWrite(principal.green.pin, 0);
@@ -117,18 +118,38 @@ void setTimerLeds(int num)
         digitalWrite(auxiliary.yellow.pin, 1);
         digitalWrite(auxiliary.red.pin, 0);
         auxiliary.green.state = false;
+        principal.green.state = false;
+        pressedButtonOnGreen1 = false;
         break;
+    }
+}
+
+void checkGreen(int num)
+{
+    for (int i = 0; i < num; i++)
+    {
+        if (pressedButtonOnGreen1 == true)
+        {
+            return;
+        }
+        else if (pressedButtonOnGreen2 == true)
+        {
+            return;
+        }
+        delay(1000);
     }
 }
 
 void setTimer()
 {
     setTimerLeds(PRIMEIRO_ESTADO_SEMAFORO); // primeiro estado semaforo
-    delay(20000);
+    delay(10000);
+    checkGreen(10);
     setTimerLeds(SEGUNDO_ESTADO_SEMAFORO);
     delay(3000);
     setTimerLeds(TERCEIRO_ESTADO_SEMAFORO);
-    delay(10000);
+    delay(5000);
+    checkGreen(5);
     setTimerLeds(QUARTO_ESTADO_SEMAFORO);
     delay(3000);
 }
