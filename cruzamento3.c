@@ -1,5 +1,8 @@
 #include <wiringPi.h>
 #include <stdio.h>
+#include <time.h>
+#include <string.h>
+#include <sys/time.h>
 
 typedef int bool;
 #define true 1
@@ -34,18 +37,21 @@ int SENSOR_VELOCIDADE_1_B = 4; // passa carro 1 e o para tbm
 int SENSOR_VELOCIDADE_2_A = 5; // para carro 2
 int SENSOR_VELOCIDADE_2_B = 6; // passa carro 2 e o para tbm
 
+int secondsSensorVelocidade1A = 0;
+int secondsSensorVelocidade1B = 0;
+
 typedef struct led
 {
-    int pin;
-    bool state;
-    int color;
+  int pin;
+  bool state;
+  int color;
 } led;
 
 typedef struct trafficLights
 {
-    led red;
-    led yellow;
-    led green;
+  led red;
+  led yellow;
+  led green;
 } trafficLights;
 
 trafficLights principal;
@@ -53,190 +59,242 @@ trafficLights auxiliary;
 
 void passengerPass()
 {
-    long interruptTime = millis();
+  long interruptTime = millis();
 
-    if (interruptTime - lastInterruptTime > 300)
+  if (interruptTime - lastInterruptTime > 300)
+  {
+    if (auxiliary.green.state && digitalRead(BOTAO_PEDESTRE_1))
     {
-        if (auxiliary.green.state && digitalRead(BOTAO_PEDESTRE_1))
-        {
-            pressedButtonOnGreen1 = true;
-        }
-
-        else if (principal.green.state && digitalRead(BOTAO_PEDESTRE_2))
-        {
-            pressedButtonOnGreen2 = true;
-        }
+      pressedButtonOnGreen1 = true;
     }
-    lastInterruptTime = interruptTime;
+
+    else if (principal.green.state && digitalRead(BOTAO_PEDESTRE_2))
+    {
+      pressedButtonOnGreen2 = true;
+    }
+  }
+  lastInterruptTime = interruptTime;
 }
 
 void carPassSensor()
 {
-    long interruptTime = millis();
+  long interruptTime = millis();
 
-    if (interruptTime - lastInterruptTime > 300)
-    {
-        carSensorButton1 = digitalRead(SENSOR_PASSAGEM_1);
-        carSensorButton2 = digitalRead(SENSOR_PASSAGEM_2);
-    }
-    lastInterruptTime = interruptTime;
+  if (interruptTime - lastInterruptTime > 300)
+  {
+    carSensorButton1 = digitalRead(SENSOR_PASSAGEM_1);
+    carSensorButton2 = digitalRead(SENSOR_PASSAGEM_2);
+  }
+  lastInterruptTime = interruptTime;
 }
 
 void setTimerLeds(int num)
 {
-    switch (num)
-    {
-    case PRIMEIRO_ESTADO_SEMAFORO:
-        digitalWrite(principal.green.pin, 1);
-        digitalWrite(principal.yellow.pin, 0);
-        digitalWrite(principal.red.pin, 0);
-        digitalWrite(auxiliary.green.pin, 0);
-        digitalWrite(auxiliary.yellow.pin, 0);
-        digitalWrite(auxiliary.red.pin, 1);
-        auxiliary.green.state = false;
-        principal.green.state = true;
-        pressedButtonOnRed = true;
-        break;
-    case SEGUNDO_ESTADO_SEMAFORO:
-        digitalWrite(principal.green.pin, 0);
-        digitalWrite(principal.yellow.pin, 1);
-        digitalWrite(principal.red.pin, 0);
-        digitalWrite(auxiliary.green.pin, 0);
-        digitalWrite(auxiliary.yellow.pin, 0);
-        digitalWrite(auxiliary.red.pin, 1);
-        auxiliary.green.state = false;
-        principal.green.state = false;
-        pressedButtonOnGreen2 = false;
-        pressedButtonOnRed = false;
-        break;
-    case TERCEIRO_ESTADO_SEMAFORO:
-        digitalWrite(principal.green.pin, 0);
-        digitalWrite(principal.yellow.pin, 0);
-        digitalWrite(principal.red.pin, 1);
-        digitalWrite(auxiliary.green.pin, 1);
-        digitalWrite(auxiliary.yellow.pin, 0);
-        digitalWrite(auxiliary.red.pin, 0);
-        auxiliary.green.state = true;
-        principal.green.state = false;
-        pressedButtonOnRed = false;
-        break;
-    case QUARTO_ESTADO_SEMAFORO:
-        digitalWrite(principal.green.pin, 0);
-        digitalWrite(principal.yellow.pin, 0);
-        digitalWrite(principal.red.pin, 1);
-        digitalWrite(auxiliary.green.pin, 0);
-        digitalWrite(auxiliary.yellow.pin, 1);
-        digitalWrite(auxiliary.red.pin, 0);
-        auxiliary.green.state = false;
-        principal.green.state = false;
-        pressedButtonOnGreen1 = false;
-        pressedButtonOnRed = false;
-        break;
-    case ESTADO_VERMELHO_SEMAFORO:
-        digitalWrite(principal.green.pin, 0);
-        digitalWrite(principal.yellow.pin, 0);
-        digitalWrite(principal.red.pin, 1);
-        digitalWrite(auxiliary.green.pin, 0);
-        digitalWrite(auxiliary.yellow.pin, 0);
-        digitalWrite(auxiliary.red.pin, 1);
-        pressedButtonOnRed = false;
-        break;
-    }
+  switch (num)
+  {
+  case PRIMEIRO_ESTADO_SEMAFORO:
+    digitalWrite(principal.green.pin, 1);
+    digitalWrite(principal.yellow.pin, 0);
+    digitalWrite(principal.red.pin, 0);
+    digitalWrite(auxiliary.green.pin, 0);
+    digitalWrite(auxiliary.yellow.pin, 0);
+    digitalWrite(auxiliary.red.pin, 1);
+    auxiliary.green.state = false;
+    principal.green.state = true;
+    pressedButtonOnRed = true;
+    break;
+  case SEGUNDO_ESTADO_SEMAFORO:
+    digitalWrite(principal.green.pin, 0);
+    digitalWrite(principal.yellow.pin, 1);
+    digitalWrite(principal.red.pin, 0);
+    digitalWrite(auxiliary.green.pin, 0);
+    digitalWrite(auxiliary.yellow.pin, 0);
+    digitalWrite(auxiliary.red.pin, 1);
+    auxiliary.green.state = false;
+    principal.green.state = false;
+    pressedButtonOnGreen2 = false;
+    pressedButtonOnRed = false;
+    break;
+  case TERCEIRO_ESTADO_SEMAFORO:
+    digitalWrite(principal.green.pin, 0);
+    digitalWrite(principal.yellow.pin, 0);
+    digitalWrite(principal.red.pin, 1);
+    digitalWrite(auxiliary.green.pin, 1);
+    digitalWrite(auxiliary.yellow.pin, 0);
+    digitalWrite(auxiliary.red.pin, 0);
+    auxiliary.green.state = true;
+    principal.green.state = false;
+    pressedButtonOnRed = false;
+    break;
+  case QUARTO_ESTADO_SEMAFORO:
+    digitalWrite(principal.green.pin, 0);
+    digitalWrite(principal.yellow.pin, 0);
+    digitalWrite(principal.red.pin, 1);
+    digitalWrite(auxiliary.green.pin, 0);
+    digitalWrite(auxiliary.yellow.pin, 1);
+    digitalWrite(auxiliary.red.pin, 0);
+    auxiliary.green.state = false;
+    principal.green.state = false;
+    pressedButtonOnGreen1 = false;
+    pressedButtonOnRed = false;
+    break;
+  case ESTADO_VERMELHO_SEMAFORO:
+    digitalWrite(principal.green.pin, 0);
+    digitalWrite(principal.yellow.pin, 0);
+    digitalWrite(principal.red.pin, 1);
+    digitalWrite(auxiliary.green.pin, 0);
+    digitalWrite(auxiliary.yellow.pin, 0);
+    digitalWrite(auxiliary.red.pin, 1);
+    pressedButtonOnRed = false;
+    break;
+  }
 }
 
 void checkTimeTraffic(int num)
 {
-    for (int i = 0; i < num; i++)
+  for (int i = 0; i < num; i++)
+  {
+    if (pressedButtonOnGreen1 == true)
     {
-        if (pressedButtonOnGreen1 == true)
-        {
-            return;
-        }
-        else if (pressedButtonOnGreen2 == true)
-        {
-            return;
-        }
-        else if (carSensorButton1) // checa o vermelho
-        {
-            return;
-        }
-        else if (carSensorButton2) // checa o vermelho
-        {
-            return;
-        }
-        delay(1000);
+      return;
     }
+    else if (pressedButtonOnGreen2 == true)
+    {
+      return;
+    }
+    else if (carSensorButton1) // checa o vermelho
+    {
+      return;
+    }
+    else if (carSensorButton2) // checa o vermelho
+    {
+      return;
+    }
+    delay(1000);
+  }
 }
 
 void setTimer()
 {
-    setTimerLeds(ESTADO_VERMELHO_SEMAFORO);
-    delay(1000);
-    setTimerLeds(PRIMEIRO_ESTADO_SEMAFORO); // primeiro estado semaforo
-    delay(10000);
-    checkTimeTraffic(8);
-    setTimerLeds(SEGUNDO_ESTADO_SEMAFORO);
-    delay(3000);
-    setTimerLeds(ESTADO_VERMELHO_SEMAFORO);
-    delay(1000);
-    setTimerLeds(TERCEIRO_ESTADO_SEMAFORO);
-    delay(5000);
-    checkTimeTraffic(4);
-    setTimerLeds(QUARTO_ESTADO_SEMAFORO);
-    delay(3000);
+  setTimerLeds(ESTADO_VERMELHO_SEMAFORO);
+  delay(1000);
+  setTimerLeds(PRIMEIRO_ESTADO_SEMAFORO); // primeiro estado semaforo
+  delay(10000);
+  checkTimeTraffic(8);
+  setTimerLeds(SEGUNDO_ESTADO_SEMAFORO);
+  delay(3000);
+  setTimerLeds(ESTADO_VERMELHO_SEMAFORO);
+  delay(1000);
+  setTimerLeds(TERCEIRO_ESTADO_SEMAFORO);
+  delay(5000);
+  checkTimeTraffic(4);
+  setTimerLeds(QUARTO_ESTADO_SEMAFORO);
+  delay(3000);
 }
 
 led setLed(int num, int pin)
 {
-    led l;
-    l.color = num;
-    l.pin = pin;
-    l.state = false;
-    pinMode(pin, OUTPUT);
-    return l;
+  led l;
+  l.color = num;
+  l.pin = pin;
+  l.state = false;
+  pinMode(pin, OUTPUT);
+  return l;
 }
 
 void setTrafficLights()
 {
-    principal.green = setLed(1, SEMAFORO_2_VERDE);    // 1 = verde
-    principal.yellow = setLed(2, SEMAFORO_2_AMARELO); // 2 = amarelo
-    principal.red = setLed(3, SEMAFORO_2_VERMELHO);   // 3 = vermelho
+  principal.green = setLed(1, SEMAFORO_2_VERDE);    // 1 = verde
+  principal.yellow = setLed(2, SEMAFORO_2_AMARELO); // 2 = amarelo
+  principal.red = setLed(3, SEMAFORO_2_VERMELHO);   // 3 = vermelho
 
-    auxiliary.green = setLed(1, SEMAFORO_1_VERDE);    // 1 = verde
-    auxiliary.yellow = setLed(2, SEMAFORO_1_AMARELO); // 2 = amarelo
-    auxiliary.red = setLed(3, SEMAFORO_1_VERMELHO);   // 3 = vermelho
+  auxiliary.green = setLed(1, SEMAFORO_1_VERDE);    // 1 = verde
+  auxiliary.yellow = setLed(2, SEMAFORO_1_AMARELO); // 2 = amarelo
+  auxiliary.red = setLed(3, SEMAFORO_1_VERMELHO);   // 3 = vermelho
+}
+
+int current_timestamp_to_seconds()
+{
+  int hours, minutes, seconds, day, month, year;
+
+  time_t now;
+  time(&now);
+
+  struct tm *local = localtime(&now);
+
+  hours = local->tm_hour;
+  minutes = local->tm_min;
+  seconds = local->tm_sec;
+
+  int sec = ((hours * 3600) + (minutes * 60) + seconds);
+  return sec;
+}
+
+void carPassSpeedSensor()
+{
+  long interruptTime = millis();
+
+  if (interruptTime - lastInterruptTime > 50)
+  {
+    secondsSensorVelocidade1B = current_timestamp_to_seconds();
+  }
+  lastInterruptTime = interruptTime;
+}
+
+void carPassSpeedSensorCheck()
+{
+  long interruptTime = millis();
+
+  if (interruptTime - lastInterruptTime > 50)
+  {
+    if (secondsSensorVelocidade1B != 0)
+    {
+      secondsSensorVelocidade1A = current_timestamp_to_seconds();
+
+      int resultSenconds = secondsSensorVelocidade1A - secondsSensorVelocidade1B;
+      int velocityms = 1 / resultSenconds;
+      int velocitykm = velocityms * 3.6;
+      printf("A velocidade do carro foi de: %d km/h\n", velocitykm);
+    }
+  }
+  lastInterruptTime = interruptTime;
+  secondsSensorVelocidade1B = 0;
 }
 
 int main(void)
 {
-    wiringPiSetup();
+  wiringPiSetup();
 
-    setTrafficLights();
+  setTrafficLights();
 
-    pinMode(BOTAO_PEDESTRE_1, INPUT);
-    pullUpDnControl(BOTAO_PEDESTRE_1, PUD_UP);
-    wiringPiISR(BOTAO_PEDESTRE_1, INT_EDGE_RISING, &passengerPass);
+  pinMode(BOTAO_PEDESTRE_1, INPUT);
+  pullUpDnControl(BOTAO_PEDESTRE_1, PUD_UP);
+  wiringPiISR(BOTAO_PEDESTRE_1, INT_EDGE_RISING, &passengerPass);
 
-    pinMode(BOTAO_PEDESTRE_2, INPUT);
-    pullUpDnControl(BOTAO_PEDESTRE_2, PUD_UP);
-    wiringPiISR(BOTAO_PEDESTRE_2, INT_EDGE_RISING, &passengerPass);
+  pinMode(BOTAO_PEDESTRE_2, INPUT);
+  pullUpDnControl(BOTAO_PEDESTRE_2, PUD_UP);
+  wiringPiISR(BOTAO_PEDESTRE_2, INT_EDGE_RISING, &passengerPass);
 
-    pinMode(SENSOR_PASSAGEM_1, INPUT);
-    pullUpDnControl(SENSOR_PASSAGEM_1, PUD_UP);
-    wiringPiISR(SENSOR_PASSAGEM_1, INT_EDGE_BOTH, &carPassSensor);
+  pinMode(SENSOR_PASSAGEM_1, INPUT);
+  pullUpDnControl(SENSOR_PASSAGEM_1, PUD_UP);
+  wiringPiISR(SENSOR_PASSAGEM_1, INT_EDGE_BOTH, &carPassSensor);
 
-    pinMode(SENSOR_PASSAGEM_2, INPUT);
-    pullUpDnControl(SENSOR_PASSAGEM_2, PUD_UP);
-    wiringPiISR(SENSOR_PASSAGEM_2, INT_EDGE_BOTH, &carPassSensor);
+  pinMode(SENSOR_PASSAGEM_2, INPUT);
+  pullUpDnControl(SENSOR_PASSAGEM_2, PUD_UP);
+  wiringPiISR(SENSOR_PASSAGEM_2, INT_EDGE_BOTH, &carPassSensor);
 
-    // pinMode(SENSOR_VELOCIDADE_1_A, INPUT);
-    // pullUpDnControl(SENSOR_VELOCIDADE_1_A, PUD_UP);
-    // wiringPiISR(SENSOR_VELOCIDADE_1_A, INT_EDGE_FALLING, &teste);
+  pinMode(SENSOR_VELOCIDADE_1_A, INPUT);
+  pullUpDnControl(SENSOR_VELOCIDADE_1_A, PUD_UP);
+  wiringPiISR(SENSOR_VELOCIDADE_1_A, INT_EDGE_RISING, &carPassSpeedSensorCheck);
 
-    while (1)
-    {
-        setTimer();
-    }
+  pinMode(SENSOR_VELOCIDADE_1_B, INPUT);
+  pullUpDnControl(SENSOR_VELOCIDADE_1_B, PUD_UP);
+  wiringPiISR(SENSOR_VELOCIDADE_1_B, INT_EDGE_FALLING, &carPassSpeedSensor);
 
-    return 0;
+  while (1)
+  {
+    setTimer();
+  }
+
+  return 0;
 }
