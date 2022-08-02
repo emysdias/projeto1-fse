@@ -215,19 +215,24 @@ void setTrafficLights()
 
 int current_timestamp_to_seconds()
 {
-  int hours, minutes, seconds, day, month, year;
+  int hours, minutes, seconds, mseconds;
+  struct timeval tv;
+  struct tm *tm;
 
   time_t now;
   time(&now);
 
-  struct tm *local = localtime(&now);
+  gettimeofday(&tv, NULL);
 
-  hours = local->tm_hour;
-  minutes = local->tm_min;
-  seconds = local->tm_sec;
+  tm = localtime(&tv.tv_sec);
 
-  int sec = ((hours * 3600) + (minutes * 60) + seconds);
-  return sec;
+  hours = tm->tm_hour;
+  minutes = tm->tm_min;
+  seconds = tm->tm_sec;
+  mseconds = (int)(tv.tv_usec / 1000);
+
+  int msec = ((hours * 3600000) + (minutes * 60000) + (seconds * 1000) + (mseconds)); // transforma em ms
+  return msec;
 }
 
 void carPassSpeedSensor()
@@ -251,8 +256,8 @@ void carPassSpeedSensorCheck()
     {
       secondsSensorVelocidade1A = current_timestamp_to_seconds();
 
-      int resultSenconds = secondsSensorVelocidade1A - secondsSensorVelocidade1B;
-      int velocityms = 1 / resultSenconds;
+      int resultMSenconds = secondsSensorVelocidade1A - secondsSensorVelocidade1B;
+      int velocityms = 1 / (resultMSenconds * 0.001); // converte de ms para s
       int velocitykm = velocityms * 3.6;
       printf("A velocidade do carro foi de: %d km/h\n", velocitykm);
     }
@@ -290,6 +295,14 @@ int main(void)
   pinMode(SENSOR_VELOCIDADE_1_B, INPUT);
   pullUpDnControl(SENSOR_VELOCIDADE_1_B, PUD_UP);
   wiringPiISR(SENSOR_VELOCIDADE_1_B, INT_EDGE_FALLING, &carPassSpeedSensor);
+
+  // pinMode(SENSOR_VELOCIDADE_2_A, INPUT);
+  // pullUpDnControl(SENSOR_VELOCIDADE_2_A, PUD_UP);
+  // wiringPiISR(SENSOR_VELOCIDADE_2_A, INT_EDGE_RISING, &carPassSpeedSensorCheck);
+
+  // pinMode(SENSOR_VELOCIDADE_2_B, INPUT);
+  // pullUpDnControl(SENSOR_VELOCIDADE_2_B, PUD_UP);
+  // wiringPiISR(SENSOR_VELOCIDADE_2_B, INT_EDGE_FALLING, &carPassSpeedSensor);
 
   while (1)
   {
