@@ -3,7 +3,7 @@
 #include <time.h>
 #include <string.h>
 #include <sys/time.h>
-#include "variaveis.h"
+#include "../inc/variaveis.h"
 
 typedef int bool;
 #define true 1
@@ -284,10 +284,9 @@ void carPassSpeedSensorCheck()
   secondsSensorVelocidadeB = 0;
 }
 
-void semaphore_1_3()
+void main()
 {
   wiringPiSetup();
-
   setTrafficLights();
 
   pinMode(BOTAO_PEDESTRE_1, INPUT);

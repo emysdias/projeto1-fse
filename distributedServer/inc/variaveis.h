@@ -38,5 +38,4 @@
 #define SENSOR_VELOCIDADE_2_B 24
 #endif
 
-void semaphore_1_3();
 #endif

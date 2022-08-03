@@ -1,15 +1,9 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h> //Header file for sleep(). man 3 sleep for details.
-#include <pthread.h>
-#include "variaveis.h"
-#define PLACA_04
+#define PLACA_01
+// #include "variaveis.h"
 
-// A normal C function that is executed as a thread
-// when its name is specified in pthread_create()
-
-int main()
+int main(int argc, char *argv[])
 {
-    semaphore_1_3();
+    semaphore44(argv[1]);
     return 0;
 }
