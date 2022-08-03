@@ -40,6 +40,8 @@ int SENSOR_VELOCIDADE_2_B = 6; // passa carro 2 e o para tbm
 int secondsSensorVelocidadeA = 0;
 int secondsSensorVelocidadeB = 0;
 
+int countRed = 0;
+
 typedef struct numberOfInfractions
 {
   int redLightAdvance;
@@ -89,6 +91,15 @@ void carPassSensor()
 
   if (interruptTime - lastInterruptTime > 300)
   {
+    if (auxiliary.red.state)
+    {
+      countRed += 1;
+      if (countRed == 2)
+      {
+        principalInfractions.redLightAdvance += 1;
+        countRed = 0;
+      }
+    }
     carSensorButton1 = digitalRead(SENSOR_PASSAGEM_1);
     carSensorButton2 = digitalRead(SENSOR_PASSAGEM_2);
   }
@@ -107,6 +118,7 @@ void setTimerLeds(int num)
     digitalWrite(auxiliary.yellow.pin, 0);
     digitalWrite(auxiliary.red.pin, 1);
     auxiliary.green.state = false;
+    auxiliary.red.state = true;
     principal.green.state = true;
     principal.red.state = false;
     pressedButtonOnRed = true;
@@ -120,6 +132,7 @@ void setTimerLeds(int num)
     digitalWrite(auxiliary.red.pin, 1);
     auxiliary.green.state = false;
     principal.green.state = false;
+    auxiliary.red.state = true;
     principal.red.state = false;
     pressedButtonOnGreen2 = false;
     pressedButtonOnRed = false;
@@ -131,6 +144,7 @@ void setTimerLeds(int num)
     digitalWrite(auxiliary.green.pin, 1);
     digitalWrite(auxiliary.yellow.pin, 0);
     digitalWrite(auxiliary.red.pin, 0);
+    auxiliary.red.state = false;
     auxiliary.green.state = true;
     principal.green.state = false;
     principal.red.state = true;
@@ -144,6 +158,7 @@ void setTimerLeds(int num)
     digitalWrite(auxiliary.yellow.pin, 1);
     digitalWrite(auxiliary.red.pin, 0);
     auxiliary.green.state = false;
+    auxiliary.red.state = false;
     principal.green.state = false;
     principal.red.state = true;
     pressedButtonOnGreen1 = false;
@@ -156,8 +171,9 @@ void setTimerLeds(int num)
     digitalWrite(auxiliary.green.pin, 0);
     digitalWrite(auxiliary.yellow.pin, 0);
     digitalWrite(auxiliary.red.pin, 1);
-    pressedButtonOnRed = false;
     principal.red.state = true;
+    auxiliary.red.state = true;
+    pressedButtonOnRed = false;
     break;
   }
 }
