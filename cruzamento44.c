@@ -3,6 +3,7 @@
 #include <time.h>
 #include <string.h>
 #include <sys/time.h>
+#include "variaveis.h"
 
 typedef int bool;
 #define true 1
@@ -21,21 +22,6 @@ bool carSensorButton2 = false;
 #define SEGUNDO_ESTADO_SEMAFORO 2
 #define TERCEIRO_ESTADO_SEMAFORO 3
 #define QUARTO_ESTADO_SEMAFORO 4
-
-int SEMAFORO_1_VERDE = 31;
-int SEMAFORO_1_AMARELO = 25;
-int SEMAFORO_1_VERMELHO = 29;
-int SEMAFORO_2_VERDE = 28;
-int SEMAFORO_2_AMARELO = 27;
-int SEMAFORO_2_VERMELHO = 26;
-int BOTAO_PEDESTRE_1 = 10;
-int BOTAO_PEDESTRE_2 = 11;
-int SENSOR_PASSAGEM_1 = 15;
-int SENSOR_PASSAGEM_2 = 16;
-int SENSOR_VELOCIDADE_1_A = 1; // para carro 1
-int SENSOR_VELOCIDADE_1_B = 4; // passa carro 1 e o para tbm
-int SENSOR_VELOCIDADE_2_A = 5; // para carro 2
-int SENSOR_VELOCIDADE_2_B = 6; // passa carro 2 e o para tbm
 
 int secondsSensorVelocidadeA = 0;
 int secondsSensorVelocidadeB = 0;
@@ -298,7 +284,7 @@ void carPassSpeedSensorCheck()
   secondsSensorVelocidadeB = 0;
 }
 
-int main(void)
+void semaphore_1_3()
 {
   wiringPiSetup();
 
@@ -340,6 +326,4 @@ int main(void)
   {
     setTimer();
   }
-
-  return 0;
 }
