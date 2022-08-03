@@ -37,8 +37,14 @@ int SENSOR_VELOCIDADE_1_B = 4; // passa carro 1 e o para tbm
 int SENSOR_VELOCIDADE_2_A = 5; // para carro 2
 int SENSOR_VELOCIDADE_2_B = 6; // passa carro 2 e o para tbm
 
-int secondsSensorVelocidade1A = 0;
-int secondsSensorVelocidade1B = 0;
+int secondsSensorVelocidadeA = 0;
+int secondsSensorVelocidadeB = 0;
+
+typedef struct numberOfInfractions
+{
+  int redLightAdvance;
+  int aboveTheAllowedSpeed;
+} numberOfInfractions;
 
 typedef struct led
 {
@@ -56,6 +62,7 @@ typedef struct trafficLights
 
 trafficLights principal;
 trafficLights auxiliary;
+numberOfInfractions principalInfractions;
 
 void passengerPass()
 {
@@ -101,6 +108,7 @@ void setTimerLeds(int num)
     digitalWrite(auxiliary.red.pin, 1);
     auxiliary.green.state = false;
     principal.green.state = true;
+    principal.red.state = false;
     pressedButtonOnRed = true;
     break;
   case SEGUNDO_ESTADO_SEMAFORO:
@@ -112,6 +120,7 @@ void setTimerLeds(int num)
     digitalWrite(auxiliary.red.pin, 1);
     auxiliary.green.state = false;
     principal.green.state = false;
+    principal.red.state = false;
     pressedButtonOnGreen2 = false;
     pressedButtonOnRed = false;
     break;
@@ -124,6 +133,7 @@ void setTimerLeds(int num)
     digitalWrite(auxiliary.red.pin, 0);
     auxiliary.green.state = true;
     principal.green.state = false;
+    principal.red.state = true;
     pressedButtonOnRed = false;
     break;
   case QUARTO_ESTADO_SEMAFORO:
@@ -135,6 +145,7 @@ void setTimerLeds(int num)
     digitalWrite(auxiliary.red.pin, 0);
     auxiliary.green.state = false;
     principal.green.state = false;
+    principal.red.state = true;
     pressedButtonOnGreen1 = false;
     pressedButtonOnRed = false;
     break;
@@ -146,6 +157,7 @@ void setTimerLeds(int num)
     digitalWrite(auxiliary.yellow.pin, 0);
     digitalWrite(auxiliary.red.pin, 1);
     pressedButtonOnRed = false;
+    principal.red.state = true;
     break;
   }
 }
@@ -241,7 +253,7 @@ void carPassSpeedSensor()
 
   if (interruptTime - lastInterruptTime > 50)
   {
-    secondsSensorVelocidade1B = current_timestamp_to_seconds();
+    secondsSensorVelocidadeB = current_timestamp_to_seconds();
   }
   lastInterruptTime = interruptTime;
 }
@@ -252,18 +264,22 @@ void carPassSpeedSensorCheck()
 
   if (interruptTime - lastInterruptTime > 50)
   {
-    if (secondsSensorVelocidade1B != 0)
+    if (secondsSensorVelocidadeB != 0)
     {
-      secondsSensorVelocidade1A = current_timestamp_to_seconds();
+      secondsSensorVelocidadeA = current_timestamp_to_seconds();
 
-      int resultMSenconds = secondsSensorVelocidade1A - secondsSensorVelocidade1B;
+      int resultMSenconds = secondsSensorVelocidadeA - secondsSensorVelocidadeB;
       int velocityms = 1 / (resultMSenconds * 0.001); // converte de ms para s
       int velocitykm = velocityms * 3.6;
+      if (velocitykm > 60)
+        principalInfractions.aboveTheAllowedSpeed += 1;
+      if (principal.red.state)
+        principalInfractions.redLightAdvance += 1;
       printf("A velocidade do carro foi de: %d km/h\n", velocitykm);
     }
   }
   lastInterruptTime = interruptTime;
-  secondsSensorVelocidade1B = 0;
+  secondsSensorVelocidadeB = 0;
 }
 
 int main(void)
@@ -294,15 +310,15 @@ int main(void)
 
   pinMode(SENSOR_VELOCIDADE_1_B, INPUT);
   pullUpDnControl(SENSOR_VELOCIDADE_1_B, PUD_UP);
-  wiringPiISR(SENSOR_VELOCIDADE_1_B, INT_EDGE_FALLING, &carPassSpeedSensor);
+  wiringPiISR(SENSOR_VELOCIDADE_1_B, INT_EDGE_RISING, &carPassSpeedSensor);
 
-  // pinMode(SENSOR_VELOCIDADE_2_A, INPUT);
-  // pullUpDnControl(SENSOR_VELOCIDADE_2_A, PUD_UP);
-  // wiringPiISR(SENSOR_VELOCIDADE_2_A, INT_EDGE_RISING, &carPassSpeedSensorCheck);
+  pinMode(SENSOR_VELOCIDADE_2_A, INPUT);
+  pullUpDnControl(SENSOR_VELOCIDADE_2_A, PUD_UP);
+  wiringPiISR(SENSOR_VELOCIDADE_2_A, INT_EDGE_RISING, &carPassSpeedSensorCheck);
 
-  // pinMode(SENSOR_VELOCIDADE_2_B, INPUT);
-  // pullUpDnControl(SENSOR_VELOCIDADE_2_B, PUD_UP);
-  // wiringPiISR(SENSOR_VELOCIDADE_2_B, INT_EDGE_FALLING, &carPassSpeedSensor);
+  pinMode(SENSOR_VELOCIDADE_2_B, INPUT);
+  pullUpDnControl(SENSOR_VELOCIDADE_2_B, PUD_UP);
+  wiringPiISR(SENSOR_VELOCIDADE_2_B, INT_EDGE_RISING, &carPassSpeedSensor);
 
   while (1)
   {
