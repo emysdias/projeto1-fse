@@ -5,7 +5,7 @@
 #include <sys/time.h>
 #include <pthread.h>
 #include "../inc/socket.h"
-#include "../inc/variaveis.h"
+// #include "../inc/variaveis.h"
 
 typedef int bool;
 #define true 1
@@ -24,6 +24,21 @@ bool carSensorButton2 = false;
 #define SEGUNDO_ESTADO_SEMAFORO 2
 #define TERCEIRO_ESTADO_SEMAFORO 3
 #define QUARTO_ESTADO_SEMAFORO 4
+
+int SEMAFORO_1_VERDE = 31;
+int SEMAFORO_1_AMARELO = 25;
+int SEMAFORO_1_VERMELHO = 29;
+int SEMAFORO_2_VERDE = 28;
+int SEMAFORO_2_AMARELO = 27;
+int SEMAFORO_2_VERMELHO = 26;
+int BOTAO_PEDESTRE_1 = 10;
+int BOTAO_PEDESTRE_2 = 11;
+int SENSOR_PASSAGEM_1 = 15;
+int SENSOR_PASSAGEM_2 = 16;
+int SENSOR_VELOCIDADE_1_A = 1;
+int SENSOR_VELOCIDADE_1_B = 4;
+int SENSOR_VELOCIDADE_2_A = 5;
+int SENSOR_VELOCIDADE_2_B = 6;
 
 int secondsSensorVelocidadeA = 0;
 int secondsSensorVelocidadeB = 0;
@@ -360,8 +375,26 @@ void *threadFunc(void *arg)
   close(sockfd);
 }
 
-void main()
+void main(int argc, char *argv[])
 {
+  if (strcmp(argv[1], "placa2") == 0)
+  {
+    SEMAFORO_1_VERDE = 8;
+    SEMAFORO_1_AMARELO = 9;
+    SEMAFORO_1_VERMELHO = 14;
+    SEMAFORO_2_VERDE = 30;
+    SEMAFORO_2_AMARELO = 21;
+    SEMAFORO_2_VERMELHO = 22;
+    BOTAO_PEDESTRE_1 = 12;
+    BOTAO_PEDESTRE_2 = 13;
+    SENSOR_PASSAGEM_1 = 7;
+    SENSOR_PASSAGEM_2 = 0;
+    SENSOR_VELOCIDADE_1_A = 2;
+    SENSOR_VELOCIDADE_1_B = 3;
+    SENSOR_VELOCIDADE_2_A = 23;
+    SENSOR_VELOCIDADE_2_B = 24;
+  }
+
   pthread_create(&threadA, NULL, threadFunc, NULL);
   wiringPiSetup();
   setTrafficLights();
