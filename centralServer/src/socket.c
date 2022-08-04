@@ -1,5 +1,19 @@
 #include "../inc/socket.h"
 
+void connectSocket(int sockfd, struct sockaddr_in servaddr)
+{
+    int c = connect(sockfd, (SA *)&servaddr, sizeof(servaddr));
+    if (c != 0)
+    {
+        printf("connection with the server failed...\n");
+        exit(0);
+    }
+    else
+    {
+        printf("connected to the server..\n");
+    }
+}
+
 int configureSocket()
 {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -43,19 +57,5 @@ void listenSocket(int sockfd)
     else
     {
         printf("Server listening...\n\n");
-    }
-}
-
-void connectSocket(int sockfd, struct sockaddr_in servaddr)
-{
-    int c = connect(sockfd, (SA *)&servaddr, sizeof(servaddr));
-    if (c != 0)
-    {
-        printf("connection with the server failed...\n");
-        exit(0);
-    }
-    else
-    {
-        printf("connected to the server..\n");
     }
 }

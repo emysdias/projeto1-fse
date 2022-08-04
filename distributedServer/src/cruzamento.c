@@ -1,11 +1,4 @@
-#include <wiringPi.h>
-#include <stdio.h>
-#include <time.h>
-#include <string.h>
-#include <sys/time.h>
-#include <pthread.h>
 #include "../inc/socket.h"
-// #include "../inc/variaveis.h"
 
 typedef int bool;
 #define true 1
@@ -352,7 +345,6 @@ void *secondThread(void *arg)
   while (1)
   {
     read(sockfd, buff, MAX);
-    printf("%s\n", buff);
   }
 }
 

@@ -48,4 +48,10 @@ placa1 é o GPIO Cruzamento 1 e a placa2 é o GPIO Cruzamento 2 do trabalho: htt
 
 ## Modo de Uso
 
-O servidor central aceita até 4 conexões simultâneas, sendo os 4 cruzamentos. O teste que foi feito executando RASP 44 - servidor central com as placas do servidor distribuído (as duas instâncias) e com a RASP 43 - 2 instâncias do servidor distribuído.
+O servidor central aceita até 4 conexões simultâneas, sendo os 4 cruzamentos. O teste que foi feito executando a raspberry44 mas funciona para rodar as duas juntas. Basta rodar nas duas placas, com a inet_addr diferente das placas.
+
+# Referências
+
+Para o socket:
+
+https://www.geeksforgeeks.org/socket-programming-in-cc-handling-multiple-clients-on-server-without-multi-threading/

@@ -12,8 +12,11 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <errno.h>
+#include <wiringPi.h>
+#include <time.h>
+#include <pthread.h>
 
-#define MAX 100
+#define MAX 200
 #define PORT 10091
 #define SA struct sockaddr
 

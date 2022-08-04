@@ -15,7 +15,7 @@
 
 #define TRUE 1
 #define FALSE 0
-#define MAX 100
+#define MAX 200
 #define PORT 10091
 #define SA struct sockaddr
 
