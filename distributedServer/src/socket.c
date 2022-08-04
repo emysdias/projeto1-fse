@@ -46,22 +46,6 @@ void listenSocket(int sockfd)
     }
 }
 
-int handleAcceptSocket(int sockfd, struct sockaddr_in cli, int len)
-{
-    int acc = accept(sockfd, (SA *)&cli, &len);
-
-    if (acc < 0)
-    {
-        printf("Server accept failed...\n");
-        exit(0);
-    }
-    else
-    {
-        printf("Server accept client...\n");
-        return acc;
-    }
-}
-
 void connectSocket(int sockfd, struct sockaddr_in servaddr)
 {
     int c = connect(sockfd, (SA *)&servaddr, sizeof(servaddr));

@@ -72,8 +72,6 @@ int main()
         if (client_socket[i] == 0)
         {
           client_socket[i] = new_socket;
-          printf("Adding to list of sockets as %d\n", i);
-
           break;
         }
       }
@@ -95,8 +93,13 @@ int main()
         {
           int aboveTheAllowedSpeed = buffer[0];
           int redLightAdvance = buffer[1];
-          printf("Quantidade de Carros: %d\n", aboveTheAllowedSpeed);
-          printf("Velocidade média: %d\n", redLightAdvance);
+          int countVelocity = buffer[2];
+          int carLength = buffer[3];
+
+          printf("Fluxo de trânsito nas vias principais: %d carros\n", carLength);
+          printf("Velocidade media da via: %d hm/h\n", countVelocity);
+          printf("Quantidade de carros com velocidade acima de 60 km/h: %d\n", aboveTheAllowedSpeed);
+          printf("Quantidade de carros com avanço no sinal vermelho: %d\n\n", redLightAdvance);
           bzero(buffer, MAX);
         }
       }

@@ -19,7 +19,6 @@
 
 int configureSocket();
 void listenSocket(int sockfd);
-int handleAcceptSocket(int sockfd, struct sockaddr_in cli, int len);
 void bindSocket(int sockfd, struct sockaddr_in servaddr);
 void connectSocket(int sockfd, struct sockaddr_in servaddr);
 

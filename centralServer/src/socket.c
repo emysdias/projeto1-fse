@@ -42,23 +42,7 @@ void listenSocket(int sockfd)
     }
     else
     {
-        printf("Server listening...\n");
-    }
-}
-
-int handleAcceptSocket(int sockfd, struct sockaddr_in cli, int len)
-{
-    int acc = accept(sockfd, (SA *)&cli, &len);
-
-    if (acc < 0)
-    {
-        printf("Server accept failed...\n");
-        exit(0);
-    }
-    else
-    {
-        printf("Server accept client...\n");
-        return acc;
+        printf("Server listening...\n\n");
     }
 }
 

@@ -29,6 +29,9 @@ int secondsSensorVelocidadeA = 0;
 int secondsSensorVelocidadeB = 0;
 
 int reportsLength = 0;
+int countVelocidade = 0;
+int countCarros = 0;
+int countFluxo = 0;
 
 pthread_t threadA;
 pthread_t threadB;
@@ -39,6 +42,7 @@ typedef struct numberOfInfractions
 {
   int redLightAdvance;
   int aboveTheAllowedSpeed;
+  int mediaCarro;
 } numberOfInfractions;
 
 typedef struct led
@@ -287,6 +291,9 @@ void carPassSpeedSensorCheck()
       if (principal.red.state)
         principalInfractions.redLightAdvance += 1;
       printf("A velocidade do carro foi de: %d km/h\n", velocitykm);
+      countVelocidade += velocitykm;
+      countCarros++;
+      principalInfractions.mediaCarro = countVelocidade / countCarros;
     }
   }
   lastInterruptTime = interruptTime;
@@ -301,12 +308,14 @@ void sendData(int sockfd)
   while (1)
   {
     bzero(buffer, sizeof(buffer));
-    // printf("%d\n", reportsLength);
     count = 0;
     while (count < reportsLength)
     {
       buffer[0] = principalInfractions.aboveTheAllowedSpeed;
       buffer[1] = principalInfractions.redLightAdvance;
+      buffer[2] = principalInfractions.mediaCarro;
+      buffer[3] = reportsLength;
+
       write(sockfd, buffer, sizeof(buffer));
       bzero(buffer, sizeof(buffer));
       count++;
@@ -319,7 +328,7 @@ void sendData(int sockfd)
   delay(2000);
 }
 
-void *thread_funcB(void *arg)
+void *secondThread(void *arg)
 {
   char buff[MAX];
   int n;
@@ -332,7 +341,7 @@ void *thread_funcB(void *arg)
   }
 }
 
-void *thread_func(void *arg)
+void *threadFunc(void *arg)
 {
   int sockfd, connfd;
   struct sockaddr_in servaddr, cli;
@@ -346,14 +355,14 @@ void *thread_func(void *arg)
 
   connectSocket(sockfd, servaddr);
 
-  pthread_create(&threadB, NULL, thread_funcB, (void *)sockfd);
+  pthread_create(&threadB, NULL, secondThread, (void *)sockfd);
   sendData(sockfd);
   close(sockfd);
 }
 
 void main()
 {
-  pthread_create(&threadA, NULL, thread_func, NULL);
+  pthread_create(&threadA, NULL, threadFunc, NULL);
   wiringPiSetup();
   setTrafficLights();
 
