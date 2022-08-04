@@ -301,7 +301,7 @@ void sendData(int sockfd)
   while (1)
   {
     bzero(buffer, sizeof(buffer));
-    printf("%d\n", reportsLength);
+    // printf("%d\n", reportsLength);
     count = 0;
     while (count < reportsLength)
     {
@@ -341,7 +341,7 @@ void *thread_func(void *arg)
   bzero(&servaddr, sizeof(servaddr));
 
   servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = htonl(inet_addr("164.41.98.26"));
+  servaddr.sin_addr.s_addr = inet_addr("164.41.98.26");
   servaddr.sin_port = htons(PORT);
 
   connectSocket(sockfd, servaddr);

@@ -3,8 +3,7 @@
 int main()
 {
   int opt = TRUE;
-  int sockfd, len, i;
-  int master_socket, addrlen, new_socket, client_socket[4], max_clients = 4, activity, valread, sd;
+  int master_socket, addrlen, new_socket, client_socket[4], max_clients = 4, activity, valread, sd, i;
   int max_sd;
   struct sockaddr_in address;
   char buffer[MAX];
@@ -16,9 +15,9 @@ int main()
     client_socket[i] = 0;
   }
 
-  sockfd = configureSocket();
+  master_socket = configureSocket();
 
-  if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0)
+  if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0)
   {
     perror("setsockopt");
     exit(EXIT_FAILURE);
@@ -27,11 +26,11 @@ int main()
   bzero(&address, sizeof(address));
 
   address.sin_family = AF_INET;
-  address.sin_addr.s_addr = INADDR_ANY;
+  address.sin_addr.s_addr = htonl(INADDR_ANY);
   address.sin_port = htons(PORT);
 
-  bindSocket(sockfd, address);
-  listenSocket(sockfd);
+  bindSocket(master_socket, address);
+  listenSocket(master_socket);
 
   addrlen = sizeof(address);
 
@@ -39,8 +38,8 @@ int main()
   {
     FD_ZERO(&readfds);
 
-    FD_SET(sockfd, &readfds);
-    max_sd = sockfd;
+    FD_SET(master_socket, &readfds);
+    max_sd = master_socket;
 
     for (i = 0; i < max_clients; i++)
     {
@@ -60,9 +59,9 @@ int main()
       printf("select error");
     }
 
-    if (FD_ISSET(sockfd, &readfds))
+    if (FD_ISSET(master_socket, &readfds))
     {
-      if ((new_socket = accept(sockfd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+      if ((new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
       {
         perror("accept");
         exit(EXIT_FAILURE);
