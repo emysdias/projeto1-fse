@@ -50,7 +50,7 @@ placa1 é o GPIO Cruzamento 1 e a placa2 é o GPIO Cruzamento 2 do trabalho: htt
 
 O servidor central aceita até 4 conexões simultâneas, sendo os 4 cruzamentos. O teste que foi feito executando a raspberry44 mas funciona para rodar as duas juntas. Basta rodar nas duas placas, com a inet_addr diferente das placas.
 
-# Referências
+## Referências
 
 Para o socket:
 
