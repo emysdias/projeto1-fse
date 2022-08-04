@@ -3,6 +3,8 @@
 #include <time.h>
 #include <string.h>
 #include <sys/time.h>
+#include <pthread.h>
+#include "../inc/socket.h"
 #include "../inc/variaveis.h"
 
 typedef int bool;
@@ -25,6 +27,11 @@ bool carSensorButton2 = false;
 
 int secondsSensorVelocidadeA = 0;
 int secondsSensorVelocidadeB = 0;
+
+int reportsLength = 0;
+
+pthread_t threadA;
+pthread_t threadB;
 
 int countRed = 0;
 
@@ -77,6 +84,7 @@ void carPassSensor()
 
   if (interruptTime - lastInterruptTime > 300)
   {
+    reportsLength += 1;
     if (auxiliary.red.state)
     {
       countRed += 1;
@@ -266,6 +274,7 @@ void carPassSpeedSensorCheck()
 
   if (interruptTime - lastInterruptTime > 50)
   {
+    reportsLength += 1;
     if (secondsSensorVelocidadeB != 0)
     {
       secondsSensorVelocidadeA = current_timestamp_to_seconds();
@@ -284,8 +293,67 @@ void carPassSpeedSensorCheck()
   secondsSensorVelocidadeB = 0;
 }
 
+void sendData(int sockfd)
+{
+  char buffer[MAX];
+  int count;
+
+  while (1)
+  {
+    bzero(buffer, sizeof(buffer));
+    printf("%d\n", reportsLength);
+    count = 0;
+    while (count < reportsLength)
+    {
+      buffer[0] = principalInfractions.aboveTheAllowedSpeed;
+      buffer[1] = principalInfractions.redLightAdvance;
+      write(sockfd, buffer, sizeof(buffer));
+      bzero(buffer, sizeof(buffer));
+      count++;
+      if (count == reportsLength)
+      {
+        reportsLength = 0;
+      }
+    }
+  }
+  delay(2000);
+}
+
+void *thread_funcB(void *arg)
+{
+  char buff[MAX];
+  int n;
+  int sockfd = (int)arg;
+
+  while (1)
+  {
+    read(sockfd, buff, MAX);
+    printf("%s\n", buff);
+  }
+}
+
+void *thread_func(void *arg)
+{
+  int sockfd, connfd;
+  struct sockaddr_in servaddr, cli;
+
+  sockfd = configureSocket();
+  bzero(&servaddr, sizeof(servaddr));
+
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl(inet_addr("164.41.98.26"));
+  servaddr.sin_port = htons(PORT);
+
+  connectSocket(sockfd, servaddr);
+
+  pthread_create(&threadB, NULL, thread_funcB, (void *)sockfd);
+  sendData(sockfd);
+  close(sockfd);
+}
+
 void main()
 {
+  pthread_create(&threadA, NULL, thread_func, NULL);
   wiringPiSetup();
   setTrafficLights();
 

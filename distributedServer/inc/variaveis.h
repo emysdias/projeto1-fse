@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#if defined(PLACA_01) || defined(PLACA_03)
-// placa 1
 #define SEMAFORO_1_VERDE 31
 #define SEMAFORO_1_AMARELO 25
 #define SEMAFORO_1_VERMELHO 29
@@ -20,22 +18,26 @@
 #define SENSOR_VELOCIDADE_1_B 4
 #define SENSOR_VELOCIDADE_2_A 5
 #define SENSOR_VELOCIDADE_2_B 6
-#else
-// placa 2
-#define SEMAFORO_1_VERDE 8
-#define SEMAFORO_1_AMARELO 9
-#define SEMAFORO_1_VERMELHO 14
-#define SEMAFORO_2_VERDE 30
-#define SEMAFORO_2_AMARELO 21
-#define SEMAFORO_2_VERMELHO 22
-#define BOTAO_PEDESTRE_1 12
-#define BOTAO_PEDESTRE_2 13
-#define SENSOR_PASSAGEM_1 7
-#define SENSOR_PASSAGEM_2 0
-#define SENSOR_VELOCIDADE_1_A 2
-#define SENSOR_VELOCIDADE_1_B 3
-#define SENSOR_VELOCIDADE_2_A 23
-#define SENSOR_VELOCIDADE_2_B 24
-#endif
+
+// #if defined(PLACA_01) || defined(PLACA_03)
+// placa 1
+
+// #else
+// // placa 2
+// #define SEMAFORO_1_VERDE 8
+// #define SEMAFORO_1_AMARELO 9
+// #define SEMAFORO_1_VERMELHO 14
+// #define SEMAFORO_2_VERDE 30
+// #define SEMAFORO_2_AMARELO 21
+// #define SEMAFORO_2_VERMELHO 22
+// #define BOTAO_PEDESTRE_1 12
+// #define BOTAO_PEDESTRE_2 13
+// #define SENSOR_PASSAGEM_1 7
+// #define SENSOR_PASSAGEM_2 0
+// #define SENSOR_VELOCIDADE_1_A 2
+// #define SENSOR_VELOCIDADE_1_B 3
+// #define SENSOR_VELOCIDADE_2_A 23
+// #define SENSOR_VELOCIDADE_2_B 24
+// #endif
 
 #endif

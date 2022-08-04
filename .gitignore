@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+.vscode
+server.c
+client.c
+desligar.c
+botao.c
+teste
+# main.c
